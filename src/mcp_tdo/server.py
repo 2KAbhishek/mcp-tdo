@@ -16,6 +16,7 @@ class TdoTools(str, Enum):
     GET_TODO_CONTENTS = "get_todo_contents"
     SEARCH_NOTES = "search_notes"
     GET_PENDING_TODOS = "get_pending_todos"
+    MARK_TODO_DONE = "mark_todo_done"
 
 
 class ErrorCodes(IntEnum):
@@ -125,6 +126,50 @@ class TdoServer:
 
         return PendingTodos(todos=todos)
 
+    def mark_todo_done(self, file_path: str, todo_text: str) -> TodoNote:
+        """Mark a todo as done by changing [ ] to [x]"""
+        try:
+            # Read the file content
+            content = self._read_file_contents(file_path)
+
+            # Find the exact todo line and replace [ ] with [x]
+            lines = content.splitlines()
+            todo_found = False
+
+            for i, line in enumerate(lines):
+                # Check if this line contains our todo (using strip to ignore whitespace differences)
+                if line.strip() == todo_text.strip() and "[ ]" in line:
+                    # Replace the first occurrence of [ ] with [x]
+                    lines[i] = line.replace("[ ]", "[x]", 1)
+                    todo_found = True
+                    break
+
+            if not todo_found:
+                error_data = ErrorData(
+                    code=ErrorCodes.NOT_FOUND,
+                    message=f"Todo not found in the specified file"
+                )
+                raise McpError(error_data)
+
+            # Write the updated content back to the file
+            updated_content = "\n".join(lines)
+            with open(file_path, "w") as f:
+                f.write(updated_content)
+
+            # Return the updated note
+            return TodoNote(
+                file_path=file_path,
+                content=updated_content
+            )
+        except McpError:
+            raise
+        except Exception as e:
+            error_data = ErrorData(
+                code=ErrorCodes.COMMAND_ERROR,
+                message=f"Failed to mark todo as done: {str(e)}"
+            )
+            raise McpError(error_data)
+
 
 async def serve(tdo_path: str | None = None) -> None:
     server = Server("mcp-tdo")
@@ -169,6 +214,24 @@ async def serve(tdo_path: str | None = None) -> None:
                     "properties": {},
                 },
             ),
+            Tool(
+                name=TdoTools.MARK_TODO_DONE.value,
+                description="Mark a todo item as done",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "file_path": {
+                            "type": "string",
+                            "description": "Path to the file containing the todo",
+                        },
+                        "todo_text": {
+                            "type": "string",
+                            "description": "Text of the todo item to mark as done",
+                        }
+                    },
+                    "required": ["file_path", "todo_text"],
+                },
+            ),
         ]
 
     @server.call_tool()
@@ -190,6 +253,11 @@ async def serve(tdo_path: str | None = None) -> None:
 
                 case TdoTools.GET_PENDING_TODOS.value:
                     result = tdo_server.get_pending_todos()
+
+                case TdoTools.MARK_TODO_DONE.value:
+                    file_path = arguments.get("file_path")
+                    todo_text = arguments.get("todo_text")
+                    result = tdo_server.mark_todo_done(file_path, todo_text)
 
                 case _:
                     raise ValueError(f"Unknown tool: {name}")
