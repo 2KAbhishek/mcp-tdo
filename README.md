@@ -125,6 +125,8 @@ Parameters:
 - [x] Add core todo management functionality
 - [ ] Add ability to create new todo notes
 - [ ] Modularize code
+- [ ] Publish to PyPI
+- [ ] Add CI / CD
 - [ ] Update screenshot
 
 ## 🧑‍💻 Behind The Code
