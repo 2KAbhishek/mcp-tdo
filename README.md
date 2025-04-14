@@ -110,3 +110,65 @@ bare-minimum was inspired by `<reason/idea>`.
 | <a href="https://2kabhishek.github.io/projects" target="_blank">Other Projects </a>
 
 </div>
+
+# MCP-TDO Server
+
+An MCP server that provides access to the tdo note-taking CLI tool.
+
+## Features
+
+- Get contents of todo notes for different dates
+- Search for notes matching specific queries
+- List all pending todos across your notes
+
+## Installation
+
+```bash
+pip install .
+```
+
+## Usage
+
+You can run the server directly:
+
+```bash
+python -m mcp_tdo
+```
+
+Or with custom path to tdo:
+
+```bash
+python -m mcp_tdo --tdo-path /path/to/tdo.sh
+```
+
+## Available Tools
+
+The server provides the following MCP tools:
+
+### get_todo_contents
+
+Shows contents of todo notes for today or a specific offset.
+
+Parameters:
+
+- `offset`: (optional) Offset like "1" for tomorrow, "-1" for yesterday, etc.
+
+### search_notes
+
+Searches for notes matching a query term.
+
+Parameters:
+
+- `query`: Search query term
+
+### get_pending_todos
+
+Shows all pending todos (unchecked checkboxes) from all your notes.
+
+No parameters required.
+
+## Requirements
+
+- Python 3.10+
+- tdo CLI tool installed and accessible
+- mcp-server

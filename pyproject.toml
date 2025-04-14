@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mcp-tdo"
+version = "0.1.0"
+authors = [
+    { name = "Abhishek Kumar Sharma", email = "iam2kabhishek@gmail.com" },
+]
+description = "MCP server for tdo note taking tool"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = ["mcp-server>=0.1.1", "pydantic>=2.0.0"]
+
+[project.urls]
+"Homepage" = "https://github.com/2KAbhishek/mcp-server-time"
+"Bug Tracker" = "https://github.com/2KAbhishek/mcp-server-time/issues"
+
+[project.scripts]
+mcp-tdo = "mcp_tdo:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
