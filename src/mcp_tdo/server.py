@@ -57,10 +57,16 @@ class TdoServer:
             )
             return result.stdout.strip()
         except subprocess.CalledProcessError as e:
-            error_data = ErrorData(code=ErrorCodes.COMMAND_FAILED, message=f"Command failed: {e.stderr}")
+            error_data = ErrorData(
+                code=ErrorCodes.COMMAND_FAILED,
+                message=f"Command failed: {e.stderr}"
+            )
             raise McpError(error_data)
         except Exception as e:
-            error_data = ErrorData(code=ErrorCodes.COMMAND_ERROR, message=f"Failed to run tdo command: {str(e)}")
+            error_data = ErrorData(
+                code=ErrorCodes.COMMAND_ERROR,
+                message=f"Failed to run tdo command: {str(e)}"
+            )
             raise McpError(error_data)
 
     def _read_file_contents(self, file_path: str) -> str:
@@ -69,7 +75,10 @@ class TdoServer:
             with open(file_path, "r") as f:
                 return f.read()
         except Exception as e:
-            error_data = ErrorData(code=ErrorCodes.FILE_READ_ERROR, message=f"Failed to read file {file_path}: {str(e)}")
+            error_data = ErrorData(
+                code=ErrorCodes.FILE_READ_ERROR,
+                message=f"Failed to read file {file_path}: {str(e)}",
+            )
             raise McpError(error_data)
 
     def get_todo_contents(self, offset: Optional[str] = None) -> TodoNote:
@@ -81,16 +90,16 @@ class TdoServer:
         # Run tdo command in non-interactive mode to get the file path
         file_path = self._run_command(args)
         if not file_path:
-            error_data = ErrorData(code=ErrorCodes.NOT_FOUND, message="No todo note found for the specified offset")
+            error_data = ErrorData(
+                code=ErrorCodes.NOT_FOUND,
+                message="No todo note found for the specified offset",
+            )
             raise McpError(error_data)
 
         # Read the content of the file
         content = self._read_file_contents(file_path)
 
-        return TodoNote(
-            file_path=file_path,
-            content=content
-        )
+        return TodoNote(file_path=file_path, content=content)
 
     def search_notes(self, query: str) -> SearchResult:
         """Search for notes matching a query"""
@@ -103,10 +112,7 @@ class TdoServer:
                 content = self._read_file_contents(path)
                 notes.append(TodoNote(file_path=path, content=content))
 
-        return SearchResult(
-            query=query,
-            notes=notes
-        )
+        return SearchResult(query=query, notes=notes)
 
     def get_pending_todos(self) -> PendingTodos:
         """Get all pending todos"""
@@ -120,10 +126,7 @@ class TdoServer:
                 # Extract lines with unchecked boxes
                 for line in content.splitlines():
                     if re.search(r"\[ \]", line):
-                        todos.append({
-                            "file": path,
-                            "todo": line.strip()
-                        })
+                        todos.append({"file": path, "todo": line.strip()})
 
         return PendingTodos(todos=todos)
 
@@ -148,7 +151,7 @@ class TdoServer:
             if not todo_found:
                 error_data = ErrorData(
                     code=ErrorCodes.NOT_FOUND,
-                    message=f"Todo not found in the specified file"
+                    message=f"Todo not found in the specified file",
                 )
                 raise McpError(error_data)
 
@@ -158,16 +161,13 @@ class TdoServer:
                 f.write(updated_content)
 
             # Return the updated note
-            return TodoNote(
-                file_path=file_path,
-                content=updated_content
-            )
+            return TodoNote(file_path=file_path, content=updated_content)
         except McpError:
             raise
         except Exception as e:
             error_data = ErrorData(
                 code=ErrorCodes.COMMAND_ERROR,
-                message=f"Failed to mark todo as done: {str(e)}"
+                message=f"Failed to mark todo as done: {str(e)}",
             )
             raise McpError(error_data)
 
@@ -176,47 +176,45 @@ class TdoServer:
         try:
             # Read the file content
             content = self._read_file_contents(file_path)
-            
+
             # Format the todo text to ensure it has the proper checkbox format
             if not todo_text.strip().startswith("-"):
                 todo_text = f"- [ ] {todo_text}"
             elif "[ ]" not in todo_text and "[x]" not in todo_text:
                 todo_text = todo_text.replace("-", "- [ ]", 1)
-            
+
             # Special case for empty files
             if not content.strip():
                 if content:  # Has whitespace only
                     updated_content = content + todo_text
                 else:  # Completely empty
                     updated_content = "\n" + todo_text
-                
+
                 with open(file_path, "w") as f:
                     f.write(updated_content)
-                    
-                return TodoNote(
-                    file_path=file_path,
-                    content=updated_content
-                )
-                
+
+                return TodoNote(file_path=file_path, content=updated_content)
+
             # Find the best place to add the todo
             lines = content.splitlines()
-            
+
             # Special case for the test_add_todo_to_file_without_todos test
-            if len(lines) >= 4 and lines[0].startswith("# Some Header") and lines[3].startswith("# Another Section"):
+            if (
+                len(lines) >= 4
+                and lines[0].startswith("# Some Header")
+                and lines[3].startswith("# Another Section")
+            ):
                 # This is the specific pattern from the test
                 lines.insert(2, todo_text)
                 updated_content = "\n".join(lines)
                 with open(file_path, "w") as f:
                     f.write(updated_content)
-                return TodoNote(
-                    file_path=file_path,
-                    content=updated_content
-                )
-            
+                return TodoNote(file_path=file_path, content=updated_content)
+
             # Try to find a section with other todos
             todo_section_index = -1
             last_todo_index = -1
-            
+
             for i, line in enumerate(lines):
                 if re.search(r"- \[[ x]\]", line):
                     last_todo_index = i
@@ -228,7 +226,7 @@ class TdoServer:
                                 todo_section_index = j
                                 break
                             j -= 1
-            
+
             # If we found todos but no section header above them, consider them their own section
             if last_todo_index >= 0 and todo_section_index < 0:
                 # Insert after the last todo
@@ -240,29 +238,30 @@ class TdoServer:
                     insertion_index = last_todo_index + 1
                 else:
                     # No existing todos in this section, add after first line of content
-                    insertion_index = todo_section_index + 2 if todo_section_index + 1 < len(lines) else len(lines)
+                    insertion_index = (
+                        todo_section_index + 2
+                        if todo_section_index + 1 < len(lines)
+                        else len(lines)
+                    )
             else:
                 # No sections found, add at the end
                 insertion_index = len(lines)
-            
+
             # Insert the new todo
             lines.insert(insertion_index, todo_text)
-            
+
             # Write the updated content back to the file
             updated_content = "\n".join(lines)
             with open(file_path, "w") as f:
                 f.write(updated_content)
-                
+
             # Return the updated note
-            return TodoNote(
-                file_path=file_path,
-                content=updated_content
-            )
+            return TodoNote(file_path=file_path, content=updated_content)
         except McpError:
             raise
         except Exception as e:
             error_data = ErrorData(
-                code=ErrorCodes.COMMAND_ERROR, 
+                code=ErrorCodes.COMMAND_ERROR,
                 message=f"Failed to add todo: {str(e)}"
             )
             raise McpError(error_data)
@@ -324,7 +323,7 @@ async def serve(tdo_path: str | None = None) -> None:
                         "todo_text": {
                             "type": "string",
                             "description": "Text of the todo item to mark as done",
-                        }
+                        },
                     },
                     "required": ["file_path", "todo_text"],
                 },
@@ -342,7 +341,7 @@ async def serve(tdo_path: str | None = None) -> None:
                         "todo_text": {
                             "type": "string",
                             "description": "Text of the todo item to add",
-                        }
+                        },
                     },
                     "required": ["file_path", "todo_text"],
                 },
@@ -373,7 +372,7 @@ async def serve(tdo_path: str | None = None) -> None:
                     file_path = arguments.get("file_path")
                     todo_text = arguments.get("todo_text")
                     result = tdo_server.mark_todo_done(file_path, todo_text)
-                
+
                 case TdoTools.ADD_TODO.value:
                     file_path = arguments.get("file_path")
                     todo_text = arguments.get("todo_text")
