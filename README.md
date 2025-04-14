@@ -124,6 +124,8 @@ Parameters:
 - [x] Implement basic MCP server
 - [x] Add core todo management functionality
 - [ ] Add ability to create new todo notes
+- [ ] Modularize code
+- [ ] Update screenshot
 
 ## 🧑‍💻 Behind The Code
 
