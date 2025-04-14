@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, IntEnum
 import json
 import subprocess
 import re
@@ -7,7 +7,7 @@ from typing import Sequence, List, Dict, Optional
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool, TextContent, ImageContent, EmbeddedResource
-from mcp.shared.exceptions import McpError
+from mcp.shared.exceptions import McpError, ErrorData
 
 from pydantic import BaseModel
 
@@ -16,6 +16,13 @@ class TdoTools(str, Enum):
     GET_TODO_CONTENTS = "get_todo_contents"
     SEARCH_NOTES = "search_notes"
     GET_PENDING_TODOS = "get_pending_todos"
+
+
+class ErrorCodes(IntEnum):
+    COMMAND_FAILED = 1001
+    COMMAND_ERROR = 1002
+    FILE_READ_ERROR = 1003
+    NOT_FOUND = 1004
 
 
 class TodoNote(BaseModel):
@@ -40,12 +47,19 @@ class TdoServer:
         """Run a tdo command and return its output"""
         cmd = [self.tdo_path] + args
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                check=True
+            )
             return result.stdout.strip()
         except subprocess.CalledProcessError as e:
-            raise McpError(f"Command failed: {e.stderr}")
+            error_data = ErrorData(code=ErrorCodes.COMMAND_FAILED, message=f"Command failed: {e.stderr}")
+            raise McpError(error_data)
         except Exception as e:
-            raise McpError(f"Failed to run tdo command: {str(e)}")
+            error_data = ErrorData(code=ErrorCodes.COMMAND_ERROR, message=f"Failed to run tdo command: {str(e)}")
+            raise McpError(error_data)
 
     def _read_file_contents(self, file_path: str) -> str:
         """Read the contents of a file"""
@@ -53,7 +67,8 @@ class TdoServer:
             with open(file_path, "r") as f:
                 return f.read()
         except Exception as e:
-            raise McpError(f"Failed to read file {file_path}: {str(e)}")
+            error_data = ErrorData(code=ErrorCodes.FILE_READ_ERROR, message=f"Failed to read file {file_path}: {str(e)}")
+            raise McpError(error_data)
 
     def get_todo_contents(self, offset: Optional[str] = None) -> TodoNote:
         """Get contents of todo notes"""
@@ -64,12 +79,16 @@ class TdoServer:
         # Run tdo command in non-interactive mode to get the file path
         file_path = self._run_command(args)
         if not file_path:
-            raise McpError("No todo note found for the specified offset")
+            error_data = ErrorData(code=ErrorCodes.NOT_FOUND, message="No todo note found for the specified offset")
+            raise McpError(error_data)
 
         # Read the content of the file
         content = self._read_file_contents(file_path)
 
-        return TodoNote(file_path=file_path, content=content)
+        return TodoNote(
+            file_path=file_path,
+            content=content
+        )
 
     def search_notes(self, query: str) -> SearchResult:
         """Search for notes matching a query"""
@@ -82,7 +101,10 @@ class TdoServer:
                 content = self._read_file_contents(path)
                 notes.append(TodoNote(file_path=path, content=content))
 
-        return SearchResult(query=query, notes=notes)
+        return SearchResult(
+            query=query,
+            notes=notes
+        )
 
     def get_pending_todos(self) -> PendingTodos:
         """Get all pending todos"""
@@ -96,7 +118,10 @@ class TdoServer:
                 # Extract lines with unchecked boxes
                 for line in content.splitlines():
                     if re.search(r"\[ \]", line):
-                        todos.append({"file": path, "todo": line.strip()})
+                        todos.append({
+                            "file": path,
+                            "todo": line.strip()
+                        })
 
         return PendingTodos(todos=todos)
 
