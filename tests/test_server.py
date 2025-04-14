@@ -263,3 +263,59 @@ class TestGetPendingTodos:
         # Verify the function raises the expected error
         with pytest.raises(McpError, match="Failed to run tdo command: Command error"):
             tdo_server.get_pending_todos()
+
+
+class TestMarkTodoDone:
+    @patch("mcp_tdo.server.TdoServer._read_file_contents")
+    @patch("builtins.open", new_callable=mock_open)
+    def test_mark_todo_done_success(self, mock_open_file, mock_read_contents, tdo_server):
+        """Test marking a todo as done successfully"""
+        # Set up mock for _read_file_contents to return content with todo
+        file_content = "# Todo List\n- [ ] Task 1\n- [ ] Task to mark\n- [ ] Task 3"
+        mock_read_contents.return_value = file_content
+
+        # Call the function
+        result = tdo_server.mark_todo_done("/path/to/todo.md", "- [ ] Task to mark")
+
+        # Check the content was read
+        mock_read_contents.assert_called_with("/path/to/todo.md")
+
+        # Check that the file was written with updated content
+        expected_content = "# Todo List\n- [ ] Task 1\n- [x] Task to mark\n- [ ] Task 3"
+        mock_open_file.assert_called_with("/path/to/todo.md", "w")
+        mock_open_file.return_value.__enter__.return_value.write.assert_called_with(expected_content)
+
+        # Check the result
+        assert result.file_path == "/path/to/todo.md"
+        assert result.content == expected_content
+
+    @patch("builtins.open", new_callable=mock_open)
+    def test_mark_todo_done_not_found(self, mock_file, tdo_server):
+        """Test marking a todo as done when the todo is not found"""
+        # Set up mock to return content without the specified todo
+        mock_file.return_value.__enter__.return_value.read.return_value = "# Todo List\n- [ ] Task 1\n- [ ] Task 3"
+
+        # Check that the right error is raised
+        with pytest.raises(McpError, match="Todo not found in the specified file"):
+            tdo_server.mark_todo_done("/path/to/todo.md", "- [ ] Nonexistent Task")
+
+    @patch("builtins.open")
+    def test_mark_todo_done_file_error(self, mock_file, tdo_server):
+        """Test handling of file errors when marking a todo as done"""
+        # Set up mock to raise an error on read
+        mock_file.return_value.__enter__.side_effect = Exception("File error")
+
+        # Check that the right error is raised
+        with pytest.raises(McpError, match="Failed to read file /path/to/todo.md: File error"):
+            tdo_server.mark_todo_done("/path/to/todo.md", "- [ ] Task")
+
+    @patch("builtins.open", new_callable=mock_open)
+    def test_mark_todo_done_write_error(self, mock_file, tdo_server):
+        """Test handling of write errors when marking a todo as done"""
+        # Set up mock to return content on read but fail on write
+        mock_file.return_value.__enter__.return_value.read.return_value = "# Todo List\n- [ ] Task 1\n- [ ] Task to mark\n- [ ] Task 3"
+        mock_file.return_value.__enter__.return_value.write.side_effect = Exception("Write error")
+
+        # Check that the right error is raised
+        with pytest.raises(McpError, match="Failed to mark todo as done: Write error"):
+            tdo_server.mark_todo_done("/path/to/todo.md", "- [ ] Task to mark")
