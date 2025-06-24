@@ -11,6 +11,76 @@ class TdoClient:
     def __init__(self, tdo_path: str = "tdo"):
         self.tdo_path = tdo_path
 
+    def _raise_todo_not_found_error(self) -> None:
+        error_data = ErrorData(
+            code=ErrorCodes.NOT_FOUND,
+            message="Todo not found in the specified file",
+        )
+        raise McpError(error_data)
+
+    def raise_query_missing_error(self) -> None:
+        msg = "Missing required argument: query"
+        raise ValueError(msg)
+
+    def raise_note_path_missing_error(self) -> None:
+        msg = "Missing required argument: note_path"
+        raise ValueError(msg)
+
+    def raise_unknown_tool_error(self, name: str) -> None:
+        msg = f"Unknown tool: {name}"
+        raise ValueError(msg)
+
+    def _format_todo_text(self, todo_text: str) -> str:
+        if not todo_text.strip().startswith("-"):
+            return f"- [ ] {todo_text}"
+        if "[ ]" not in todo_text and "[x]" not in todo_text:
+            return todo_text.replace("-", "- [ ]", 1)
+        return todo_text
+
+    def _handle_empty_file(
+        self, file_path: str, todo_text: str, content: str
+    ) -> TodoNote:
+        updated_content = content + todo_text if content else "\n" + todo_text
+        with Path(file_path).open("w") as f:
+            f.write(updated_content)
+        return TodoNote(file_path=file_path, content=updated_content)
+
+    def _handle_special_header_case(
+        self, file_path: str, todo_text: str, lines: list[str]
+    ) -> TodoNote:
+        lines.insert(2, todo_text)
+        updated_content = "\n".join(lines)
+        with Path(file_path).open("w") as f:
+            f.write(updated_content)
+        return TodoNote(file_path=file_path, content=updated_content)
+
+    def _find_todo_insertion_point(self, lines: list[str]) -> int:
+        todo_section_index = -1
+        last_todo_index = -1
+
+        for i, line in enumerate(lines):
+            if re.search(r"- \[[ x]\]", line):
+                last_todo_index = i
+                if todo_section_index < 0:
+                    j = i
+                    while j >= 0:
+                        if lines[j].startswith("#"):
+                            todo_section_index = j
+                            break
+                        j -= 1
+
+        if last_todo_index >= 0 and todo_section_index < 0:
+            return last_todo_index + 1
+        if todo_section_index >= 0:
+            if last_todo_index >= 0:
+                return last_todo_index + 1
+            return (
+                todo_section_index + 2
+                if todo_section_index + 1 < len(lines)
+                else len(lines)
+            )
+        return len(lines)
+
     def _run_command(self, args: list[str]) -> str:
         cmd = [self.tdo_path, *args]
         try:
@@ -124,11 +194,7 @@ class TdoClient:
                     break
 
             if not todo_found:
-                error_data = ErrorData(
-                    code=ErrorCodes.NOT_FOUND,
-                    message="Todo not found in the specified file",
-                )
-                raise McpError(error_data)
+                self._raise_todo_not_found_error()
 
             updated_content = "\n".join(lines)
             with Path(file_path).open("w") as f:
@@ -147,65 +213,27 @@ class TdoClient:
     def add_todo(self, file_path: str, todo_text: str) -> TodoNote:
         try:
             content = self._read_file_contents(file_path)
-
-            if not todo_text.strip().startswith("-"):
-                todo_text = f"- [ ] {todo_text}"
-            elif "[ ]" not in todo_text and "[x]" not in todo_text:
-                todo_text = todo_text.replace("-", "- [ ]", 1)
+            todo_text = self._format_todo_text(todo_text)
 
             if not content.strip():
-                updated_content = (
-                    content + todo_text if content else "\n" + todo_text
-                )
-
-                with Path(file_path).open("w") as f:
-                    f.write(updated_content)
-
-                return TodoNote(file_path=file_path, content=updated_content)
+                return self._handle_empty_file(file_path, todo_text, content)
 
             lines = content.splitlines()
 
+            min_lines_for_header_check = 4
             if (
-                len(lines) >= 4
+                len(lines) >= min_lines_for_header_check
                 and lines[0].startswith("# Some Header")
                 and lines[3].startswith("# Another Section")
             ):
-                lines.insert(2, todo_text)
-                updated_content = "\n".join(lines)
-                with Path(file_path).open("w") as f:
-                    f.write(updated_content)
-                return TodoNote(file_path=file_path, content=updated_content)
+                return self._handle_special_header_case(
+                    file_path, todo_text, lines
+                )
 
-            todo_section_index = -1
-            last_todo_index = -1
-
-            for i, line in enumerate(lines):
-                if re.search(r"- \[[ x]\]", line):
-                    last_todo_index = i
-                    if todo_section_index < 0:
-                        j = i
-                        while j >= 0:
-                            if lines[j].startswith("#"):
-                                todo_section_index = j
-                                break
-                            j -= 1
-
-            if last_todo_index >= 0 and todo_section_index < 0:
-                insertion_index = last_todo_index + 1
-            elif todo_section_index >= 0:
-                if last_todo_index >= 0:
-                    insertion_index = last_todo_index + 1
-                else:
-                    insertion_index = (
-                        todo_section_index + 2
-                        if todo_section_index + 1 < len(lines)
-                        else len(lines)
-                    )
-            else:
-                insertion_index = len(lines)
-
+            insertion_index = self._find_todo_insertion_point(lines)
             lines.insert(insertion_index, todo_text)
             updated_content = "\n".join(lines)
+
             with Path(file_path).open("w") as f:
                 f.write(updated_content)
 
