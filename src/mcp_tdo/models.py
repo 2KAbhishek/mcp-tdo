@@ -1,5 +1,5 @@
 from enum import Enum, IntEnum
-from typing import List, Dict
+
 from pydantic import BaseModel
 
 
@@ -27,11 +27,11 @@ class TodoNote(BaseModel):
 
 class SearchResult(BaseModel):
     query: str
-    notes: List[TodoNote]
+    notes: list[TodoNote]
 
 
 class PendingTodos(BaseModel):
-    todos: List[Dict[str, str]]
+    todos: list[dict[str, str]]
 
 
 class TodoCount(BaseModel):
