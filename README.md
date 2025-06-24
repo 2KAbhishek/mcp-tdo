@@ -198,9 +198,10 @@ uv sync
 - [x] Add core todo management functionality
 - [x] Add ability to create new todo notes
 - [x] Modularize code
-- [ ] Publish to PyPI
-- [ ] Add CI / CD
+- [x] Add CI
 - [ ] Update screenshot
+- [ ] Publish to PyPI
+- [ ] Add CD
 
 ## 🧑‍💻 Behind The Code
 
