@@ -1,9 +1,9 @@
 import json
-from typing import Sequence
+from collections.abc import Sequence
 
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
-from mcp.types import Tool, TextContent, ImageContent, EmbeddedResource
+from mcp.types import EmbeddedResource, ImageContent, TextContent, Tool
 
 from .models import TdoTools
 from .tdo_client import TdoClient
@@ -157,7 +157,7 @@ async def serve(tdo_path: str | None = None) -> None:
             ]
 
         except Exception as e:
-            raise ValueError(f"Error processing mcp-tdo query: {str(e)}")
+            raise ValueError(f"Error processing mcp-tdo query: {e!s}")
 
     options = server.create_initialization_options()
     async with stdio_server() as (read_stream, write_stream):
