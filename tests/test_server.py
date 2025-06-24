@@ -1,7 +1,8 @@
-from unittest.mock import patch, mock_open, MagicMock
-import pytest
+from unittest.mock import MagicMock, mock_open, patch
 
+import pytest
 from mcp.shared.exceptions import McpError
+
 from mcp_tdo.tdo_client import TdoClient
 
 
@@ -199,10 +200,8 @@ class TestGetPendingTodos:
 
         # Verify the result
         assert len(result.todos) == 4
-        assert result.todos[0] == {
-            "file": "/path/to/todo1.md", "todo": "- [ ] Task 1"}
-        assert result.todos[1] == {
-            "file": "/path/to/todo1.md", "todo": "- [ ] Task 2"}
+        assert result.todos[0] == {"file": "/path/to/todo1.md", "todo": "- [ ] Task 1"}
+        assert result.todos[1] == {"file": "/path/to/todo1.md", "todo": "- [ ] Task 2"}
         assert result.todos[2] == {
             "file": "/path/to/todo2.md",
             "todo": "- [ ] Another task",
@@ -235,8 +234,7 @@ class TestGetPendingTodos:
     @patch("subprocess.run")
     @patch(
         "builtins.open",
-        mock_open(
-            read_data="# Todo\n- [x] Completed task 1\n- [x] Completed task 2"),
+        mock_open(read_data="# Todo\n- [x] Completed task 1\n- [x] Completed task 2"),
     )
     def test_get_pending_todos_only_completed(self, mock_subprocess, tdo_server):
         """Test getting pending todos when all tasks are completed"""
@@ -280,8 +278,7 @@ class TestMarkTodoDone:
         mock_read_contents.return_value = file_content
 
         # Call the function
-        result = tdo_server.mark_todo_done(
-            "/path/to/todo.md", "- [ ] Task to mark")
+        result = tdo_server.mark_todo_done("/path/to/todo.md", "- [ ] Task to mark")
 
         # Check the content was read
         mock_read_contents.assert_called_with("/path/to/todo.md")
@@ -307,8 +304,7 @@ class TestMarkTodoDone:
 
         # Check that the right error is raised
         with pytest.raises(McpError, match="Todo not found in the specified file"):
-            tdo_server.mark_todo_done(
-                "/path/to/todo.md", "- [ ] Nonexistent Task")
+            tdo_server.mark_todo_done("/path/to/todo.md", "- [ ] Nonexistent Task")
 
     @patch("builtins.open")
     def test_mark_todo_done_file_error(self, mock_file, tdo_server):
@@ -431,8 +427,7 @@ class TestAddTodo:
         mock_read_contents.return_value = file_content
 
         # Call the function with already formatted todo
-        result = tdo_server.add_todo(
-            "/path/to/todo.md", "- [ ] New Formatted Task")
+        result = tdo_server.add_todo("/path/to/todo.md", "- [ ] New Formatted Task")
 
         # Check that the file was written with updated content - formatting should be preserved
         expected_content = "# Todo List\n- [ ] Existing Task\n- [ ] New Formatted Task"
@@ -527,8 +522,10 @@ class TestCreateNote:
         process_mock.stdout = "/path/to/empty_note.md"
         process_mock.returncode = 0
         mock_subprocess.return_value = process_mock
-        
-        mock_file.return_value.__enter__.return_value.read.side_effect = FileNotFoundError()
+
+        mock_file.return_value.__enter__.return_value.read.side_effect = (
+            FileNotFoundError()
+        )
 
         result = tdo_server.create_note("ideas")
 
@@ -543,7 +540,9 @@ class TestCreateNote:
         process_mock.returncode = 0
         mock_subprocess.return_value = process_mock
 
-        with pytest.raises(McpError, match="Failed to create note at the specified path"):
+        with pytest.raises(
+            McpError, match="Failed to create note at the specified path"
+        ):
             tdo_server.create_note("invalid/path")
 
     @patch("subprocess.run")
