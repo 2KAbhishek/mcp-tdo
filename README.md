@@ -37,6 +37,8 @@ mcp-tdo is a Model Context Protocol (MCP) server that allows AI models to access
 - Retrieve todo note contents for today, tomorrow, or any date offset
 - Search across all notes for specific content
 - List all pending todos across all your notes
+- Get count of pending todos across all your notes
+- Create new todo notes
 - Mark specific todos as complete
 - Add new todo items to existing note files
 - Fully compatible with the MCP specification
@@ -98,6 +100,20 @@ Shows all pending todos (unchecked checkboxes) from all your notes.
 
 No parameters required.
 
+### get_todo_count
+
+Shows the count of pending todos across all your notes.
+
+No parameters required.
+
+### create_note
+
+Creates a new todo note at the specified path.
+
+Parameters:
+
+- `note_path`: Path/name for the new note (e.g., 'tech/vim' or 'ideas')
+
 ### mark_todo_done
 
 Marks a specific todo item as done.
@@ -123,8 +139,8 @@ Parameters:
 - [x] Setup repo
 - [x] Implement basic MCP server
 - [x] Add core todo management functionality
-- [ ] Add ability to create new todo notes
-- [ ] Modularize code
+- [x] Add ability to create new todo notes
+- [x] Modularize code
 - [ ] Publish to PyPI
 - [ ] Add CI / CD
 - [ ] Update screenshot
