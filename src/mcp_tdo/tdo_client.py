@@ -84,7 +84,7 @@ class TdoClient:
     def _run_command(self, args: list[str]) -> str:
         cmd = [self.tdo_path, *args]
         try:
-            result = subprocess.run(
+            result = subprocess.run(  # noqa: S603, allow CLI tool call
                 cmd, capture_output=True, text=True, check=True
             )
             return result.stdout.strip()
