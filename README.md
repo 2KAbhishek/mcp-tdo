@@ -49,8 +49,7 @@ mcp-tdo is a Model Context Protocol (MCP) server that allows AI models to access
 
 - Python 3.10+
 - tdo CLI tool installed and accessible in your PATH
-- mcp-server >= 0.1.1
-- pydantic >= 2.0.0
+- uv
 
 ### 💻 Installation
 
@@ -82,6 +81,71 @@ Or specify a custom path to the tdo executable:
 
 ```bash
 uv run mcp-tdo --tdo-path /path/to/tdo.sh
+```
+
+### MCP Server Configuration
+
+To use this MCP server, add it to your MCP client configuration:
+
+**Option 1: Using uv (recommended)**
+
+If installed globally
+
+```json
+{
+  "mcpServers": {
+    "mcp-tdo": {
+      "command": "uv",
+      "args": ["run", "mcp-tdo"]
+    }
+  }
+}
+```
+
+For local development
+
+```json
+{
+  "mcpServers": {
+    "mcp-tdo": {
+      "command": "uv",
+      "args": ["run", "--directory", "/path/to/mcp-tdo", "mcp-tdo"]
+    }
+  }
+}
+```
+
+If your tdo executable is not in PATH:
+
+```json
+{
+  "mcpServers": {
+    "mcp-tdo": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "/path/to/mcp-tdo",
+        "mcp-tdo",
+        "--tdo-path",
+        "/path/to/your/tdo"
+      ]
+    }
+  }
+}
+```
+
+**Option 2: Using python directly**
+
+```json
+{
+  "mcpServers": {
+    "mcp-tdo": {
+      "command": "python",
+      "args": ["-m", "mcp_tdo"]
+    }
+  }
+}
 ```
 
 ## 🧩 Available Tools
