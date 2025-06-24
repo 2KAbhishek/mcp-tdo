@@ -1,5 +1,6 @@
 import re
 import subprocess
+from pathlib import Path
 
 from mcp.shared.exceptions import ErrorData, McpError
 
@@ -11,34 +12,33 @@ class TdoClient:
         self.tdo_path = tdo_path
 
     def _run_command(self, args: list[str]) -> str:
-        cmd = [self.tdo_path] + args
+        cmd = [self.tdo_path, *args]
         try:
             result = subprocess.run(cmd, capture_output=True, text=True, check=True)
             return result.stdout.strip()
         except subprocess.CalledProcessError as e:
             error_data = ErrorData(
                 code=ErrorCodes.COMMAND_FAILED,
-                message=f"Command failed: {
-                    e.stderr}",
+                message=f"Command failed: {e.stderr}",
             )
-            raise McpError(error_data)
+            raise McpError(error_data) from e
         except Exception as e:
             error_data = ErrorData(
                 code=ErrorCodes.COMMAND_ERROR,
                 message=f"Failed to run tdo command: {e!s}",
             )
-            raise McpError(error_data)
+            raise McpError(error_data) from e
 
     def _read_file_contents(self, file_path: str) -> str:
         try:
-            with open(file_path) as f:
+            with Path(file_path).open() as f:
                 return f.read()
         except Exception as e:
             error_data = ErrorData(
                 code=ErrorCodes.FILE_READ_ERROR,
                 message=f"Failed to read file {file_path}: {e!s}",
             )
-            raise McpError(error_data)
+            raise McpError(error_data) from e
 
     def get_todo_contents(self, offset: str | None = None) -> TodoNote:
         args = []
@@ -74,9 +74,11 @@ class TdoClient:
         for path in file_paths:
             if path:
                 content = self._read_file_contents(path)
-                for line in content.splitlines():
-                    if re.search(r"\[ \]", line):
-                        todos.append({"file": path, "todo": line.strip()})
+                todos.extend(
+                    {"file": path, "todo": line.strip()}
+                    for line in content.splitlines()
+                    if re.search(r"\[ \]", line)
+                )
 
         return PendingTodos(todos=todos)
 
@@ -102,7 +104,7 @@ class TdoClient:
             content = self._read_file_contents(file_path)
         except McpError:
             content = ""
-            with open(file_path, "w") as f:
+            with Path(file_path).open("w") as f:
                 f.write(content)
 
         return TodoNote(file_path=file_path, content=content)
@@ -127,7 +129,7 @@ class TdoClient:
                 raise McpError(error_data)
 
             updated_content = "\n".join(lines)
-            with open(file_path, "w") as f:
+            with Path(file_path).open("w") as f:
                 f.write(updated_content)
 
             return TodoNote(file_path=file_path, content=updated_content)
@@ -138,7 +140,7 @@ class TdoClient:
                 code=ErrorCodes.COMMAND_ERROR,
                 message=f"Failed to mark todo as done: {e!s}",
             )
-            raise McpError(error_data)
+            raise McpError(error_data) from e
 
     def add_todo(self, file_path: str, todo_text: str) -> TodoNote:
         try:
@@ -150,12 +152,9 @@ class TdoClient:
                 todo_text = todo_text.replace("-", "- [ ]", 1)
 
             if not content.strip():
-                if content:
-                    updated_content = content + todo_text
-                else:
-                    updated_content = "\n" + todo_text
+                updated_content = content + todo_text if content else "\n" + todo_text
 
-                with open(file_path, "w") as f:
+                with Path(file_path).open("w") as f:
                     f.write(updated_content)
 
                 return TodoNote(file_path=file_path, content=updated_content)
@@ -169,7 +168,7 @@ class TdoClient:
             ):
                 lines.insert(2, todo_text)
                 updated_content = "\n".join(lines)
-                with open(file_path, "w") as f:
+                with Path(file_path).open("w") as f:
                     f.write(updated_content)
                 return TodoNote(file_path=file_path, content=updated_content)
 
@@ -203,7 +202,7 @@ class TdoClient:
 
             lines.insert(insertion_index, todo_text)
             updated_content = "\n".join(lines)
-            with open(file_path, "w") as f:
+            with Path(file_path).open("w") as f:
                 f.write(updated_content)
 
             return TodoNote(file_path=file_path, content=updated_content)
@@ -212,7 +211,6 @@ class TdoClient:
         except Exception as e:
             error_data = ErrorData(
                 code=ErrorCodes.COMMAND_ERROR,
-                message=f"Failed to add todo: {
-                    e!s}",
+                message=f"Failed to add todo: {e!s}",
             )
-            raise McpError(error_data)
+            raise McpError(error_data) from e
