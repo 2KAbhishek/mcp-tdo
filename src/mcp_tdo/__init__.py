@@ -1,11 +1,11 @@
+import argparse
+import asyncio
+
 from .server import serve
 
 
 def main() -> None:
-    """MCP TDO Server - Note taking and task management functionality for MCP."""
-    import argparse
-    import asyncio
-
+    """MCP TDO Server - Note taking and task management functionality."""
     parser = argparse.ArgumentParser(
         description="give a model the ability to work with tdo notes and todos"
     )
