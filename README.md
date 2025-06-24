@@ -59,7 +59,15 @@ Installing mcp-tdo is simple:
 ```bash
 git clone https://github.com/2kabhishek/mcp-tdo
 cd mcp-tdo
-pip install .
+uv sync
+```
+
+For development:
+
+```bash
+git clone https://github.com/2kabhishek/mcp-tdo
+cd mcp-tdo
+uv sync --dev
 ```
 
 ## 🚀 Usage
@@ -67,13 +75,13 @@ pip install .
 Run the server directly:
 
 ```bash
-python -m mcp_tdo
+uv run mcp-tdo
 ```
 
 Or specify a custom path to the tdo executable:
 
 ```bash
-python -m mcp_tdo --tdo-path /path/to/tdo.sh
+uv run mcp-tdo --tdo-path /path/to/tdo.sh
 ```
 
 ## 🧩 Available Tools
@@ -131,6 +139,55 @@ Parameters:
 
 - `file_path`: Path to the file to add the todo to
 - `todo_text`: Text of the todo item to add
+
+## 🔧 Development
+
+This project uses [uv](https://docs.astral.sh/uv/) for dependency management and [Ruff](https://docs.astral.sh/ruff/) for linting and formatting.
+
+### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/2kabhishek/mcp-tdo
+cd mcp-tdo
+
+# Install dependencies (including dev dependencies)
+uv sync --dev
+```
+
+### Common Development Commands
+
+```bash
+# Run tests
+uv run pytest tests/ -v
+
+# Run linter
+uv run ruff check src/ tests/
+
+# Format code
+uv run ruff format src/ tests/
+
+# Fix linting issues automatically
+uv run ruff check --fix src/ tests/
+
+# Run the MCP server locally
+uv run mcp-tdo
+
+# Install the package in development mode
+uv sync
+```
+
+### Project Structure
+
+```
+├── src/mcp_tdo/          # Main package
+│   ├── models.py         # Data models
+│   ├── tdo_client.py     # TDO CLI integration
+│   └── server.py         # MCP server implementation
+├── tests/                # Test suite
+├── pyproject.toml        # Project configuration
+└── uv.lock              # Dependency lockfile
+```
 
 ## 🏗️ What's Next
 
