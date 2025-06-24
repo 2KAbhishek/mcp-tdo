@@ -10,7 +10,10 @@ class TestAddTodo:
     def test_add_todo_to_existing_section(
         self, mock_open_file, mock_read_contents, tdo_server
     ):
-        file_content = "# Todo List\n- [ ] Existing Task 1\n- [ ] Existing Task 2\n\n# Another Section\nSome content"
+        file_content = (
+            "# Todo List\n- [ ] Existing Task 1\n- [ ] Existing Task 2\n\n"
+            "# Another Section\nSome content"
+        )
         mock_read_contents.return_value = file_content
 
         result = tdo_server.add_todo("/path/to/todo.md", "New Task")
@@ -18,8 +21,8 @@ class TestAddTodo:
         mock_read_contents.assert_called_with("/path/to/todo.md")
 
         expected_content = (
-            "# Todo List\n- [ ] Existing Task 1\n- [ ] Existing Task 2\n- [ ] New Task\n\n"
-            "# Another Section\nSome content"
+            "# Todo List\n- [ ] Existing Task 1\n- [ ] Existing Task 2\n"
+            "- [ ] New Task\n\n# Another Section\nSome content"
         )
         mock_open_file.assert_called_once()
         mock_open_file.return_value.__enter__.return_value.write.assert_called_with(
@@ -42,7 +45,10 @@ class TestAddTodo:
 
         mock_read_contents.assert_called_with("/path/to/todo.md")
 
-        expected_content = "# Some Header\nSome content\n- [ ] New Task\n\n# Another Section\nMore content"
+        expected_content = (
+            "# Some Header\nSome content\n- [ ] New Task\n\n"
+            "# Another Section\nMore content"
+        )
         mock_open_file.assert_called_once()
         mock_open_file.return_value.__enter__.return_value.write.assert_called_with(
             expected_content

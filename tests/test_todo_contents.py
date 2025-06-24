@@ -12,8 +12,9 @@ class TestGetTodoContents:
         read_data="# Todo for today\n- [ ] Task 1\n- [ ] Task 2",
     )
     def test_get_todo_contents_no_offset(
-        self, _mock_file, mock_subprocess, tdo_server
+        self, mock_file, mock_subprocess, tdo_server
     ):
+        assert mock_file is not None
         process_mock = MagicMock()
         process_mock.stdout = "/path/to/note.md\n"
         process_mock.returncode = 0
@@ -34,8 +35,9 @@ class TestGetTodoContents:
         read_data="# Todo for tomorrow\n- [ ] Future task",
     )
     def test_get_todo_contents_with_offset(
-        self, _mock_file, mock_subprocess, tdo_server
+        self, mock_file, mock_subprocess, tdo_server
     ):
+        assert mock_file is not None
         process_mock = MagicMock()
         process_mock.stdout = "/path/to/tomorrow.md\n"
         process_mock.returncode = 0

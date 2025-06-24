@@ -13,7 +13,8 @@ class TestCreateNote:
         new_callable=mock_open,
         read_data="# New Note\nContent",
     )
-    def test_create_note_success(self, _mock_file, mock_subprocess, tdo_server):
+    def test_create_note_success(self, mock_file, mock_subprocess, tdo_server):
+        assert mock_file is not None
         process_mock = MagicMock()
         process_mock.stdout = "/path/to/new_note.md"
         process_mock.returncode = 0
