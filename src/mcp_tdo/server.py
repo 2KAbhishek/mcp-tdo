@@ -157,7 +157,7 @@ async def serve(tdo_path: str | None = None) -> None:
             ]
 
         except Exception as e:
-            raise ValueError(f"Error processing mcp-tdo query: {e!s}")
+            raise ValueError(f"Error processing mcp-tdo query: {e!s}") from e
 
     options = server.create_initialization_options()
     async with stdio_server() as (read_stream, write_stream):
