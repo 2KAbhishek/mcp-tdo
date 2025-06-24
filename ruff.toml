@@ -2,28 +2,24 @@ line-length = 80
 target-version = "py310"
 
 [lint]
-select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # pyflakes
-    "I",   # isort
-    "B",   # flake8-bugbear
-    "C4",  # flake8-comprehensions
-    "UP",  # pyupgrade
-    "ARG", # flake8-unused-arguments
-    "SIM", # flake8-simplify
-    "PTH", # flake8-use-pathlib
-    "RUF", # ruff-specific rules
-]
+select = ["ALL"]
 
 ignore = [
-    "E501", # line too long (handled by formatter)
+    "ANN",    # Skip type annotation guidelines
+    "D",      # Skip docstring guidelines
+    "COM812", # Skip Trailing commas
 ]
 
 [lint.per-file-ignores]
-"tests/*" = ["ARG001", "S101"]
+"tests/*" = [
+    "PLR2004", # Allow magic numbers in tests
+    "S101",    # Allow assert statements in tests
+]
 
 [format]
 quote-style = "double"
 indent-style = "space"
+skip-magic-trailing-comma = true
 
+[lint.isort]
+split-on-trailing-comma = false
