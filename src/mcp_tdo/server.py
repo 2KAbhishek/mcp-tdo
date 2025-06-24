@@ -46,18 +46,12 @@ async def serve(tdo_path: str | None = None) -> None:
             Tool(
                 name=TdoTools.GET_PENDING_TODOS.value,
                 description="Get all pending todos",
-                inputSchema={
-                    "type": "object",
-                    "properties": {},
-                },
+                inputSchema={"type": "object", "properties": {}},
             ),
             Tool(
                 name=TdoTools.GET_TODO_COUNT.value,
                 description="Get count of pending todos",
-                inputSchema={
-                    "type": "object",
-                    "properties": {},
-                },
+                inputSchema={"type": "object", "properties": {}},
             ),
             Tool(
                 name=TdoTools.CREATE_NOTE.value,
@@ -153,7 +147,9 @@ async def serve(tdo_path: str | None = None) -> None:
                     raise ValueError(f"Unknown tool: {name}")
 
             return [
-                TextContent(type="text", text=json.dumps(result.model_dump(), indent=2))
+                TextContent(
+                    type="text", text=json.dumps(result.model_dump(), indent=2)
+                )
             ]
 
         except Exception as e:

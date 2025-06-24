@@ -45,5 +45,7 @@ class TestGetTodoCount:
     def test_get_todo_count_command_error(self, mock_subprocess, tdo_server):
         mock_subprocess.side_effect = Exception("Command failed")
 
-        with pytest.raises(McpError, match="Failed to run tdo command: Command failed"):
+        with pytest.raises(
+            McpError, match="Failed to run tdo command: Command failed"
+        ):
             tdo_server.get_todo_count()

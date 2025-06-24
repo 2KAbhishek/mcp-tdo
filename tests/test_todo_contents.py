@@ -6,8 +6,14 @@ from mcp.shared.exceptions import McpError
 
 class TestGetTodoContents:
     @patch("subprocess.run")
-    @patch("pathlib.Path.open", new_callable=mock_open, read_data="# Todo for today\n- [ ] Task 1\n- [ ] Task 2")
-    def test_get_todo_contents_no_offset(self, _mock_file, mock_subprocess, tdo_server):
+    @patch(
+        "pathlib.Path.open",
+        new_callable=mock_open,
+        read_data="# Todo for today\n- [ ] Task 1\n- [ ] Task 2",
+    )
+    def test_get_todo_contents_no_offset(
+        self, _mock_file, mock_subprocess, tdo_server
+    ):
         process_mock = MagicMock()
         process_mock.stdout = "/path/to/note.md\n"
         process_mock.returncode = 0
@@ -22,7 +28,11 @@ class TestGetTodoContents:
         assert result.content == "# Todo for today\n- [ ] Task 1\n- [ ] Task 2"
 
     @patch("subprocess.run")
-    @patch("pathlib.Path.open", new_callable=mock_open, read_data="# Todo for tomorrow\n- [ ] Future task")
+    @patch(
+        "pathlib.Path.open",
+        new_callable=mock_open,
+        read_data="# Todo for tomorrow\n- [ ] Future task",
+    )
     def test_get_todo_contents_with_offset(
         self, _mock_file, mock_subprocess, tdo_server
     ):
@@ -43,7 +53,9 @@ class TestGetTodoContents:
     def test_get_todo_contents_command_error(self, mock_subprocess, tdo_server):
         mock_subprocess.side_effect = Exception("Command failed")
 
-        with pytest.raises(McpError, match="Failed to run tdo command: Command failed"):
+        with pytest.raises(
+            McpError, match="Failed to run tdo command: Command failed"
+        ):
             tdo_server.get_todo_contents()
 
     @patch("subprocess.run")

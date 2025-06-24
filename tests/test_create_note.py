@@ -8,7 +8,11 @@ from mcp_tdo.models import ErrorCodes
 
 class TestCreateNote:
     @patch("subprocess.run")
-    @patch("pathlib.Path.open", new_callable=mock_open, read_data="# New Note\nContent")
+    @patch(
+        "pathlib.Path.open",
+        new_callable=mock_open,
+        read_data="# New Note\nContent",
+    )
     def test_create_note_success(self, _mock_file, mock_subprocess, tdo_server):
         process_mock = MagicMock()
         process_mock.stdout = "/path/to/new_note.md"
@@ -26,13 +30,17 @@ class TestCreateNote:
     @patch("subprocess.run")
     @patch("pathlib.Path.open", new_callable=mock_open)
     @patch("mcp_tdo.tdo_client.TdoClient._read_file_contents")
-    def test_create_note_empty_file(self, mock_read_contents, mock_file, mock_subprocess, tdo_server):
+    def test_create_note_empty_file(
+        self, mock_read_contents, mock_file, mock_subprocess, tdo_server
+    ):
         process_mock = MagicMock()
         process_mock.stdout = "/path/to/empty_note.md"
         process_mock.returncode = 0
         mock_subprocess.return_value = process_mock
 
-        error_data = ErrorData(code=ErrorCodes.NOT_FOUND, message="File not found")
+        error_data = ErrorData(
+            code=ErrorCodes.NOT_FOUND, message="File not found"
+        )
         mock_read_contents.side_effect = McpError(error_data)
 
         result = tdo_server.create_note("ideas")
@@ -57,5 +65,7 @@ class TestCreateNote:
     def test_create_note_command_error(self, mock_subprocess, tdo_server):
         mock_subprocess.side_effect = Exception("Command failed")
 
-        with pytest.raises(McpError, match="Failed to run tdo command: Command failed"):
+        with pytest.raises(
+            McpError, match="Failed to run tdo command: Command failed"
+        ):
             tdo_server.create_note("tech/vim")

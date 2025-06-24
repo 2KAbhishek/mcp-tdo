@@ -14,7 +14,9 @@ class TdoClient:
     def _run_command(self, args: list[str]) -> str:
         cmd = [self.tdo_path, *args]
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, check=True
+            )
             return result.stdout.strip()
         except subprocess.CalledProcessError as e:
             error_data = ErrorData(
@@ -152,7 +154,9 @@ class TdoClient:
                 todo_text = todo_text.replace("-", "- [ ]", 1)
 
             if not content.strip():
-                updated_content = content + todo_text if content else "\n" + todo_text
+                updated_content = (
+                    content + todo_text if content else "\n" + todo_text
+                )
 
                 with Path(file_path).open("w") as f:
                     f.write(updated_content)

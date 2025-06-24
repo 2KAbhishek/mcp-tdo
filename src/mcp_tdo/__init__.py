@@ -1,8 +1,8 @@
 from .server import serve
 
 
-def main():
-    """MCP TDO Server - Note taking and task management functionality for MCP"""
+def main() -> None:
+    """MCP TDO Server - Note taking and task management functionality for MCP."""
     import argparse
     import asyncio
 
