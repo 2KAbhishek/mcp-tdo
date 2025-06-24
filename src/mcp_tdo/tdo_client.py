@@ -1,51 +1,46 @@
-import subprocess
 import re
-from typing import List, Optional
+import subprocess
 
-from mcp.shared.exceptions import McpError, ErrorData
+from mcp.shared.exceptions import ErrorData, McpError
 
-from .models import ErrorCodes, TodoNote, SearchResult, PendingTodos, TodoCount
+from .models import ErrorCodes, PendingTodos, SearchResult, TodoCount, TodoNote
 
 
 class TdoClient:
     def __init__(self, tdo_path: str = "tdo"):
         self.tdo_path = tdo_path
 
-    def _run_command(self, args: List[str]) -> str:
+    def _run_command(self, args: list[str]) -> str:
         cmd = [self.tdo_path] + args
         try:
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                check=True
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
             return result.stdout.strip()
         except subprocess.CalledProcessError as e:
             error_data = ErrorData(
                 code=ErrorCodes.COMMAND_FAILED,
-                message=f"Command failed: {e.stderr}"
+                message=f"Command failed: {
+                    e.stderr}",
             )
             raise McpError(error_data)
         except Exception as e:
             error_data = ErrorData(
                 code=ErrorCodes.COMMAND_ERROR,
-                message=f"Failed to run tdo command: {str(e)}"
+                message=f"Failed to run tdo command: {e!s}",
             )
             raise McpError(error_data)
 
     def _read_file_contents(self, file_path: str) -> str:
         try:
-            with open(file_path, "r") as f:
+            with open(file_path) as f:
                 return f.read()
         except Exception as e:
             error_data = ErrorData(
                 code=ErrorCodes.FILE_READ_ERROR,
-                message=f"Failed to read file {file_path}: {str(e)}",
+                message=f"Failed to read file {file_path}: {e!s}",
             )
             raise McpError(error_data)
 
-    def get_todo_contents(self, offset: Optional[str] = None) -> TodoNote:
+    def get_todo_contents(self, offset: str | None = None) -> TodoNote:
         args = []
         if offset:
             args.append(offset)
@@ -91,7 +86,7 @@ class TdoClient:
             count = int(count_output.strip())
         except ValueError:
             count = 0
-        
+
         return TodoCount(count=count)
 
     def create_note(self, note_path: str) -> TodoNote:
@@ -127,7 +122,7 @@ class TdoClient:
             if not todo_found:
                 error_data = ErrorData(
                     code=ErrorCodes.NOT_FOUND,
-                    message=f"Todo not found in the specified file",
+                    message="Todo not found in the specified file",
                 )
                 raise McpError(error_data)
 
@@ -141,7 +136,7 @@ class TdoClient:
         except Exception as e:
             error_data = ErrorData(
                 code=ErrorCodes.COMMAND_ERROR,
-                message=f"Failed to mark todo as done: {str(e)}",
+                message=f"Failed to mark todo as done: {e!s}",
             )
             raise McpError(error_data)
 
@@ -217,6 +212,7 @@ class TdoClient:
         except Exception as e:
             error_data = ErrorData(
                 code=ErrorCodes.COMMAND_ERROR,
-                message=f"Failed to add todo: {str(e)}"
+                message=f"Failed to add todo: {
+                    e!s}",
             )
             raise McpError(error_data)
