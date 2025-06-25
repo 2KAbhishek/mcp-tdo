@@ -3,6 +3,8 @@ import asyncio
 
 from .server import serve
 
+__version__ = "0.1.0"
+
 
 def main() -> None:
     """MCP TDO Server - Note taking and task management functionality."""
