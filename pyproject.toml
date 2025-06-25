@@ -4,10 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mcp-tdo"
-version = "0.1.0"
-authors = [
-    { name = "Abhishek Kumar Sharma", email = "iam2kabhishek@gmail.com" },
-]
+version = "0.1.1"
+authors = [{ name = "2KAbhishek", email = "keshri.abhishek63@gmail.com" }]
 description = "MCP server for tdo note taking tool"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -38,9 +36,4 @@ python_classes = ["Test*"]
 python_functions = ["test_*"]
 
 [dependency-groups]
-dev = [
-    "build>=1.2.2.post1",
-    "pytest>=8.4.1",
-    "ruff>=0.12.0",
-    "twine>=6.1.0",
-]
+dev = ["build>=1.2.2.post1", "pytest>=8.4.1", "ruff>=0.12.0", "twine>=6.1.0"]
