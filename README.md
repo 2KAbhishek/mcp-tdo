@@ -22,12 +22,6 @@
 
 <h3>MCP for your Tdos 🤖✅</h3>
 
-<figure>
-  <img src="docs/images/screenshot.png" alt="mcp-tdo in action">
-  <br/>
-  <figcaption>mcp-tdo in action</figcaption>
-</figure>
-
 </div>
 
 mcp-tdo is a Model Context Protocol (MCP) server that allows AI models to access and manage your todo notes and tasks through the [tdo](https://github.com/2kabhishek/tdo) CLI tool.
@@ -257,13 +251,6 @@ uv sync
 
 ### ✅ To-Do
 
-- [x] Setup repo
-- [x] Implement basic MCP server
-- [x] Add core todo management functionality
-- [x] Add ability to create new todo notes
-- [x] Modularize code
-- [x] Add CI
-- [ ] Update screenshot
 - [ ] Publish to PyPI
 - [ ] Add CD
 
