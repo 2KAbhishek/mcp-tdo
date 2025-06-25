@@ -8,7 +8,7 @@ from .models import ErrorCodes, PendingTodos, SearchResult, TodoCount, TodoNote
 
 
 class TdoClient:
-    def __init__(self, tdo_path: str = "tdo"):
+    def __init__(self, tdo_path: str = "tdo") -> None:
         self.tdo_path = tdo_path
 
     def _raise_todo_not_found_error(self) -> None:
