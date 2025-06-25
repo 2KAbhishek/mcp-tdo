@@ -20,6 +20,9 @@
 <a href="https://github.com/2KAbhishek/mcp-tdo/pulse">
 <img alt="Last Updated" src="https://img.shields.io/github/last-commit/2kabhishek/mcp-tdo?style=flat&color=e06c75&label="> </a>
 
+<a href="https://pypi.org/project/mcp-tdo/">
+<img alt="PyPI" src="https://img.shields.io/pypi/v/mcp-tdo?style=flat&color=blue&label=PyPI"> </a>
+
 <h3>MCP for your Tdos 🤖✅</h3>
 
 </div>
@@ -43,19 +46,28 @@ mcp-tdo is a Model Context Protocol (MCP) server that allows AI models to access
 
 - Python 3.10+
 - tdo CLI tool installed and accessible in your PATH
-- uv
+- uv for local development
 
 ### 💻 Installation
 
-Installing mcp-tdo is simple:
+#### From PyPI (Recommended)
+
+Install mcp-tdo from PyPI using pip or uv:
 
 ```bash
-git clone https://github.com/2kabhishek/mcp-tdo
-cd mcp-tdo
-uv sync
+# Using pip
+pip install mcp-tdo
+
+# Using uv (recommended)
+uv add mcp-tdo
+
+# Using pipx (for CLI tools)
+pipx install mcp-tdo
 ```
 
-For development:
+#### From Source
+
+For development or to get the latest changes:
 
 ```bash
 git clone https://github.com/2kabhishek/mcp-tdo
@@ -65,38 +77,56 @@ uv sync --dev
 
 ## 🚀 Usage
 
-Run the server directly:
+### Running the Server
+
+If installed from PyPI:
 
 ```bash
-uv run mcp-tdo
+mcp-tdo
 ```
 
 Or specify a custom path to the tdo executable:
 
 ```bash
-uv run mcp-tdo --tdo-path /path/to/tdo.sh
+mcp-tdo --tdo-path /path/to/tdo.sh
+```
+
+If running from source:
+
+```bash
+uv run mcp-tdo
 ```
 
 ### MCP Server Configuration
 
 To use this MCP server, add it to your MCP client configuration:
 
-**Option 1: Using uv (recommended)**
-
-If installed globally
+**Option 1: Using direct command (PyPI install)**
 
 ```json
 {
   "mcpServers": {
     "mcp-tdo": {
-      "command": "uv",
-      "args": ["run", "mcp-tdo"]
+      "command": "mcp-tdo"
     }
   }
 }
 ```
 
-For local development
+If your tdo executable is not in PATH:
+
+```json
+{
+  "mcpServers": {
+    "mcp-tdo": {
+      "command": "mcp-tdo",
+      "args": ["--tdo-path", "/path/to/your/tdo"]
+    }
+  }
+}
+```
+
+**Option 2: Using uv for development**
 
 ```json
 {
@@ -109,27 +139,7 @@ For local development
 }
 ```
 
-If your tdo executable is not in PATH:
-
-```json
-{
-  "mcpServers": {
-    "mcp-tdo": {
-      "command": "uv",
-      "args": [
-        "run",
-        "--directory",
-        "/path/to/mcp-tdo",
-        "mcp-tdo",
-        "--tdo-path",
-        "/path/to/your/tdo"
-      ]
-    }
-  }
-}
-```
-
-**Option 2: Using python directly**
+**Option 3: Using python directly**
 
 ```json
 {
