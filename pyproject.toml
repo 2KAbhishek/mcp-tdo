@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mcp-tdo"
-version = "0.1.1"
+version = "0.1.2"
 authors = [{ name = "2KAbhishek", email = "keshri.abhishek63@gmail.com" }]
 description = "MCP server for tdo note taking tool"
 readme = "README.md"

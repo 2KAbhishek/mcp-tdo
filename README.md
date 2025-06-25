@@ -261,8 +261,7 @@ uv sync
 
 ### ✅ To-Do
 
-- [ ] Publish to PyPI
-- [ ] Add CD
+You tell me!
 
 ## 🧑‍💻 Behind The Code
 
